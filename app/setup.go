@@ -12,6 +12,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
+type info struct {
+	Name string
+}
+
 func SetupAndRunApp() error {
 	// load env
 	err := config.LoadENV()
@@ -39,9 +43,21 @@ func SetupAndRunApp() error {
 	// attach swagger
 	config.AddSwaggerRoutes(app)
 
+	// d := info{"Joy"}
+	// d.sendMail()
+
 	// get the port and start
 	port := os.Getenv("PORT")
 	app.Listen(":" + port)
 
 	return nil
 }
+
+// func (i info) sendMail() {
+// 	result, err := mailer.GetTemplate("template.html", i)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	mailer.SendMail("alex@example.com", "bob@example.com", "Welcome", result, "")
+
+// }

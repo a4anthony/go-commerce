@@ -3,8 +3,11 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"os"
 
 	"github.com/a4anthony/go-commerce/database"
+	"github.com/a4anthony/go-commerce/mailer"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -32,6 +35,7 @@ func (nt NullTime) MarshalJSON() ([]byte, error) {
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) error {
+	fmt.Println("sddkgfkgfkkfkhgkhgkh")
 	//turn password into hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -48,5 +52,15 @@ func (u *User) SaveUser() (*User, error) {
 	if err != nil {
 		return &User{}, err
 	}
+
+	u.WelcomeEmail()
 	return u, nil
+}
+
+func (u *User) WelcomeEmail() {
+	body := mailer.PrintTemplate(mailer.UserEmail{FirstName: "Josh"}, "./mailer/templates/welcome.html")
+	from := os.Getenv("MAIL_FROM_ADDRESS")
+	to := u.Email
+	subject := "Welcome to " + os.Getenv("APP_NAME")
+	mailer.SendMail(from, to, subject, body, "")
 }
