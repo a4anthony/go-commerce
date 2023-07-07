@@ -18,6 +18,11 @@ type RegisterInput struct {
 	Password  string `validate:"required,min=6,max=32" json:"password"`
 }
 
+type LoginInput struct {
+	Email    string `validate:"required,email" json:"email"`
+	Password string `validate:"required,min=6,max=32" json:"password"`
+}
+
 type UserResponse struct {
 	Message     string      `json:"message"`
 	User        models.User `json:"user,omitempty"`
@@ -30,9 +35,18 @@ var validate = validator.New()
 func Register(c *fiber.Ctx) error {
 	user := new(RegisterInput)
 	if err := c.BodyParser(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		if err.Error() == "Unprocessable Entity" {
+			user.Email = ""
+			user.Password = ""
+			user.Phone = ""
+			user.FirstName = ""
+			user.LastName = ""
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
 	}
 
 	validationErr := validate.Struct(*user)
@@ -85,5 +99,89 @@ func Register(c *fiber.Ctx) error {
 		AccessToken: token,
 		Message:     "User created successfully.",
 	})
+
+}
+
+func Login(c *fiber.Ctx) error {
+	user := new(LoginInput)
+
+	if err := c.BodyParser(user); err != nil {
+		if err.Error() == "Unprocessable Entity" {
+			user.Email = ""
+			user.Password = ""
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+	}
+
+	validationErr := validate.Struct(*user)
+	if validationErr != nil {
+		fmt.Println(user)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(utils.SetError(validationErr))
+	}
+
+	token, err := models.LoginCheck(user.Email, user.Password)
+
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			utils.ErrorMsg{
+				Message: "Validation error",
+				Errors: map[string]string{
+					"error": "Invalid credentials.",
+				},
+			},
+		)
+	}
+
+	authenticatedUser := models.User{}
+	database.DB.Where("email = ?", user.Email).First(&authenticatedUser)
+
+	return c.Status(fiber.StatusCreated).JSON(
+		UserResponse{
+			User:        authenticatedUser,
+			AccessToken: token,
+			Message:     "User logged in successfully.",
+		},
+	)
+}
+
+func Me(c *fiber.Ctx) error {
+	fmt.Println("me")
+	uID, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			utils.ErrorMsg{
+				Message: "Validation error",
+				Errors: map[string]string{
+					"error": "Invalid credentials.",
+				},
+			},
+		)
+	}
+
+	user := models.User{}
+	database.DB.Where("id = ?", uID).First(&user)
+
+	// check if user exists
+	if user.ID == 0 {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			utils.ErrorMsg{
+				Message: "Validation error",
+				Errors: map[string]string{
+					"error": "Invalid credentials.",
+				},
+			},
+		)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(
+		UserResponse{
+			User:    user,
+			Message: "User retrieved successfully.",
+		},
+	)
 
 }

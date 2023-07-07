@@ -8,6 +8,7 @@ import (
 
 	"github.com/a4anthony/go-commerce/database"
 	"github.com/a4anthony/go-commerce/mailer"
+	"github.com/a4anthony/go-commerce/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -63,4 +64,39 @@ func (u *User) WelcomeEmail() {
 	to := u.Email
 	subject := "Welcome to " + os.Getenv("APP_NAME")
 	mailer.SendMail(from, to, subject, body, "")
+}
+
+func VerifyPassword(password, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func LoginCheck(email string, password string) (string, error) {
+	// fmt.Println(password)
+	// fmt.Println(email)
+
+	var err error
+
+	u := User{}
+
+	err = database.DB.Model(User{}).Where("email = ?", email).Take(&u).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	// fmt.Println(u.Password)
+	// fmt.Println(password)
+	err = VerifyPassword(password, u.Password)
+
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return "", err
+	}
+
+	token, err := utils.GenerateToken(u.ID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
