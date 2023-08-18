@@ -148,7 +148,6 @@ func Login(c *fiber.Ctx) error {
 }
 
 func Me(c *fiber.Ctx) error {
-	fmt.Println("me")
 	uID, err := utils.ExtractTokenID(c)
 
 	if err != nil {
@@ -181,6 +180,46 @@ func Me(c *fiber.Ctx) error {
 		UserResponse{
 			User:    user,
 			Message: "User retrieved successfully.",
+		},
+	)
+
+}
+
+func DeleteUser(c *fiber.Ctx) error {
+	uID, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			utils.ErrorMsg{
+				Message: "Validation error",
+				Errors: map[string]string{
+					"error": "Invalid credentials.",
+				},
+			},
+		)
+	}
+
+	user := models.User{}
+	database.DB.Where("id = ?", uID).First(&user)
+
+	// check if user exists
+	if user.ID == 0 {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			utils.ErrorMsg{
+				Message: "Validation error",
+				Errors: map[string]string{
+					"error": "Invalid credentials.",
+				},
+			},
+		)
+	}
+
+	database.DB.Delete(&user)
+
+	return c.Status(fiber.StatusOK).JSON(
+		UserResponse{
+			User:    user,
+			Message: "User deleted successfully.",
 		},
 	)
 

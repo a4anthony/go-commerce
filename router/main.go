@@ -1,14 +1,15 @@
 package router
 
 import (
-	"fmt"
-
 	"github.com/a4anthony/go-commerce/handlers"
 	"github.com/a4anthony/go-commerce/middlewares"
 	"github.com/gofiber/fiber/v2"
+
+	_ "github.com/a4anthony/go-commerce/docs"
 )
 
 func SetupRoutes(app *fiber.App) {
+
 	app.Get("/health", handlers.HandleHealthCheck)
 
 	api := app.Group("/api")
@@ -18,9 +19,10 @@ func SetupRoutes(app *fiber.App) {
 
 	usersGroupPrivate := api.Group("/users")
 
-	fmt.Println(usersGroupPrivate)
+	// fmt.Println(usersGroupPrivate)
 
 	usersGroup.Post("/register", handlers.Register)
 	usersGroup.Post("/login", handlers.Login)
 	usersGroupPrivate.Get("/me", middlewares.JwtAuthMiddleware(), handlers.Me)
+	usersGroupPrivate.Delete("", middlewares.JwtAuthMiddleware(), handlers.DeleteUser)
 }
