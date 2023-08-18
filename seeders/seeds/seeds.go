@@ -1,6 +1,9 @@
 package seeds
 
 import (
+	"fmt"
+
+	"github.com/a4anthony/go-commerce/database"
 	"github.com/a4anthony/go-commerce/seeders"
 	"gorm.io/gorm"
 )
@@ -8,10 +11,12 @@ import (
 func All() []seeders.Seed {
 	output := []seeders.Seed{}
 	output = append(output, userSeed()...)
+	output = append(output, categorySeed()...)
 	return output
 }
 
 func userSeed() []seeders.Seed {
+	fmt.Println("Creating users...")
 	return []seeders.Seed{
 		{
 			Name: "CreateA4anthony",
@@ -42,4 +47,33 @@ func userSeed() []seeders.Seed {
 			},
 		},
 	}
+}
+
+func categorySeed() []seeders.Seed {
+	fmt.Println("Creating categories...")
+
+	categories := []string{
+		"Electronics",
+		"Home",
+		"Kitchen",
+		"Phones",
+		"Computers",
+		"Groceries",
+		"Beauty",
+		"Health",
+		"Automobile",
+		"Books",
+		"Baby",
+	}
+	output := []seeders.Seed{}
+	db := database.DB
+	for _, category := range categories {
+		runFunc := func(db *gorm.DB) error {
+			err := CreateCategory(db, category, category+" category description")
+			return err
+		}
+		runFunc(db)
+
+	}
+	return output
 }

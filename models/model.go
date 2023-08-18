@@ -11,6 +11,11 @@ type ModelID struct {
 }
 
 type ModelTimeStamps struct {
+	CreatedAt time.Time `gorm:"primarykey" json:"created_at"`
+	UpdatedAt time.Time `gorm:"primarykey" json:"updated_at"`
+}
+
+type ModelTimeStampsWithDeletedAt struct {
 	CreatedAt time.Time      `gorm:"primarykey" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"primarykey" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`

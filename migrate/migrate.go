@@ -27,16 +27,17 @@ func Migrate() {
 
 	appModels := []interface{}{
 		&models.User{},
+		&models.Category{},
 	}
 
 	if *useRefresh {
+		fmt.Println("Dropping tables...")
 		for _, model := range appModels {
 			database.DB.Migrator().DropTable(model)
 		}
 	}
 
 	for _, model := range appModels {
-		fmt.Println(database.DB.Migrator().HasTable(model))
 		if !database.DB.Migrator().HasTable(model) {
 			database.DB.AutoMigrate(model)
 		}

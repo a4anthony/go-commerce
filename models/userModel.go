@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/a4anthony/go-commerce/database"
@@ -21,7 +20,15 @@ type User struct {
 	Email           string   `gorm:"size:255;not null;unique" json:"email"`
 	Password        string   `gorm:"size:255;not null;" json:"-"`
 	EmailVerifiedAt NullTime `gorm:"index, null" json:"email_verified_at"`
-	ModelTimeStamps
+	ModelTimeStampsWithDeletedAt
+}
+
+type Tabler interface {
+	TableName() string
+}
+
+func (User) TableName() string {
+	return "userpppppp"
 }
 
 type NullTime struct {
@@ -36,7 +43,6 @@ func (nt NullTime) MarshalJSON() ([]byte, error) {
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) error {
-	fmt.Println("sddkgfkgfkkfkhgkhgkh")
 	//turn password into hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {

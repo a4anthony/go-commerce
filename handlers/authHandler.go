@@ -32,6 +32,7 @@ type UserResponse struct {
 
 var validate = validator.New()
 
+// @Summary Regiuster new user.
 func Register(c *fiber.Ctx) error {
 	user := new(RegisterInput)
 	if err := c.BodyParser(user); err != nil {
@@ -66,6 +67,14 @@ func Register(c *fiber.Ctx) error {
 				},
 			},
 		)
+	}
+
+	// check if user was deleted
+	deletedUser := &models.User{}
+	database.DB.Unscoped().Where("email = ? AND deleted_at IS NOT NULL", user.Email).First(&deletedUser)
+
+	if deletedUser != nil {
+		database.DB.Unscoped().Delete(&deletedUser)
 	}
 
 	u := models.User{
