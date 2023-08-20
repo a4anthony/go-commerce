@@ -52,28 +52,98 @@ func userSeed() []seeders.Seed {
 func categorySeed() []seeders.Seed {
 	fmt.Println("Creating categories...")
 
-	categories := []string{
-		"Electronics",
-		"Home",
-		"Kitchen",
-		"Phones",
-		"Computers",
-		"Groceries",
-		"Beauty",
-		"Health",
-		"Automobile",
-		"Books",
-		"Baby",
+	// Create categories with sub_categories array
+	categories := map[string]interface{}{
+		"Electronics": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Home": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Kitchen": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Phones": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Computers": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Groceries": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Beauty": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Health": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Automobile": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+			"Sub category 4",
+			"Sub category 5",
+		},
+		"Books": []string{
+			"Sub category 1",
+			"Sub category 2",
+			"Sub category 3",
+		},
+		"Baby": []string{
+			"Sub category 1",
+			"Sub category 2",
+		},
 	}
-	output := []seeders.Seed{}
+
 	db := database.DB
-	for _, category := range categories {
+
+	for category, subCategories := range categories {
+		fmt.Println(category, subCategories)
 		runFunc := func(db *gorm.DB) error {
-			err := CreateCategory(db, category, category+" category description")
+			category, err := CreateCategory(db, category, category+" category description")
+			if category.ID > 0 {
+				for _, subCategory := range subCategories.([]string) {
+					CreateSubCategory(db, subCategory, subCategory+" sub category description", category.ID)
+				}
+			}
 			return err
 		}
 		runFunc(db)
-
 	}
+
+	output := []seeders.Seed{}
 	return output
 }

@@ -23,14 +23,6 @@ type User struct {
 	ModelTimeStampsWithDeletedAt
 }
 
-type Tabler interface {
-	TableName() string
-}
-
-func (User) TableName() string {
-	return "userpppppp"
-}
-
 type NullTime struct {
 	sql.NullTime
 }

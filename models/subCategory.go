@@ -2,12 +2,13 @@ package models
 
 import "database/sql"
 
-type Category struct {
+type SubCategory struct {
 	ModelID
 	Name        string       `gorm:"size:255;not null;" json:"name"`
-	Slug        string       `gorm:"size:255;not null;unique" json:"slug"`
+	Slug        string       `gorm:"size:255;not null;" json:"slug"`
 	Description string       `gorm:"size:255;not null;" json:"description"`
 	IsActive    sql.NullBool `gorm:"default:false" json:"is_active"`
-	SubCategory []SubCategory
+	CategoryID  uint         `gorm:"not null" json:"category_id"`
+	Category    Category     `gorm:"foreignKey:CategoryID" json:"category"`
 	ModelTimeStamps
 }

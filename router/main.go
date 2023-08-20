@@ -25,4 +25,8 @@ func SetupRoutes(app *fiber.App) {
 	usersGroup.Post("/login", handlers.Login)
 	usersGroupPrivate.Get("/me", middlewares.JwtAuthMiddleware(), handlers.Me)
 	usersGroupPrivate.Delete("", middlewares.JwtAuthMiddleware(), handlers.DeleteUser)
+
+	// Categories
+	categoriesGroup := api.Group("/categories")
+	categoriesGroup.Get("/", handlers.GetAllCategories)
 }

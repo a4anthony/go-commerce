@@ -28,6 +28,7 @@ func Migrate() {
 	appModels := []interface{}{
 		&models.User{},
 		&models.Category{},
+		&models.SubCategory{},
 	}
 
 	if *useRefresh {
